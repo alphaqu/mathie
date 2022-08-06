@@ -83,12 +83,11 @@ impl BasePrefix for () {
 
 
 impl<N: Number, F: BasePrefix + Unit, T: BasePrefix + Unit> UnitCompatibility<N, F> for T {
-	fn convert_pos2(&self, pos: Vec2D<N, F>) -> Option<Vec2D<N, T>> {
+	fn convert_value(&self, value: Value<N, F>) -> Option<Value<N, Self>> {
 		let ratio = F::base_factor() / T::base_factor();
-		Some(Vec2D::new_u(
-			N::from_f64(pos.x().to_f64()? * ratio)?,
-			N::from_f64(pos.y().to_f64()? * ratio)?,
-			T::default(),
-		))
+		Some(Value {
+			value: N::from_f64(value.to_f64()? * ratio)?,
+			unit: *self
+		})
 	}
 }
