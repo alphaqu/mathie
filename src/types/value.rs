@@ -3,9 +3,11 @@ use std::ops::Deref;
 use crate::number::Number;
 use crate::unit::Unit;
 
+#[derive(Copy, Clone, Debug)]
+#[repr(C)]
 pub struct Value<T: Number, U: Unit> {
-	value: T,
-	unit: U
+	pub(crate) value: T,
+	pub(crate) unit: U
 }
 
 impl<N: Number, U: Unit> Value<N, U> {
@@ -20,7 +22,7 @@ impl<N: Number, U: Unit> Value<N, U> {
 	pub fn unit(self) -> U  {
 		self.unit
 	}
-	
+
 	#[inline(always)]
 	pub fn val(self) -> N  {
 		self.value
