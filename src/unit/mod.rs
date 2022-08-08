@@ -30,8 +30,8 @@ pub trait UnitCompatibility<N: Number, Rhs: Unit>: Unit {
 		Some(Vec2D::new_u(x.value, y.value, *self))
 	}
 	fn convert_rect(&self, rect: Rect<N, Rhs>) -> Option<Rect<N, Self>> {
-		let origin = rect.origin().convert_u(*self)?;
-		let size = rect.size().convert_u(*self)?;
+		let origin = rect.origin().try_convert_u(*self)?;
+		let size = rect.size().try_convert_u(*self)?;
 		Some(Rect::new_u(origin, size, *self))
 	}
 }

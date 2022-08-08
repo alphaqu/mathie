@@ -13,20 +13,30 @@ pub struct Rect<T: Number, U: Unit = ()> {
 }
 
 impl<N: Number> Rect<N> {
-	pub fn new(origin: impl Into<[N; 2]>, size: impl Into<[N; 2]>) -> Rect<N> {
+	pub fn new_any(origin: impl Into<[N; 2]>, size: impl Into<[N; 2]>) -> Rect<N> {
 		Rect::new_u(origin, size, ())
 	}
 
-	pub fn new_min_max(min: impl Into<[N; 2]>, max: impl Into<[N; 2]>) -> Rect<N> {
-		Rect::new_min_max_u(min, max, ())
+	pub fn new_any_min_max(min: impl Into<[N; 2]>, max: impl Into<[N; 2]>) -> Rect<N> {
+		Rect::new_u_min_max(min, max, ())
 	}
 
 	pub fn zero() -> Rect<N> {
-		Rect::new(Vec2D::zero(), Vec2D::zero())
+		Rect::new_any(Vec2D::zero(), Vec2D::zero())
 	}
 
 	pub fn one() -> Rect<N> {
-		Rect::new(Vec2D::one(), Vec2D::one())
+		Rect::new_any(Vec2D::one(), Vec2D::one())
+	}
+}
+
+impl<N: Number, U: Unit + Default> Rect<N, U> {
+	pub fn new(origin: impl Into<[N; 2]>, size: impl Into<[N; 2]>) -> Rect<N, U> {
+		Rect::new_u(origin, size, U::default())
+	}
+
+	pub fn new_min_max(min: impl Into<[N; 2]>, max: impl Into<[N; 2]>) -> Rect<N, U> {
+		Rect::new_u_min_max(min, max, U::default())
 	}
 }
 
@@ -39,7 +49,7 @@ impl<N: Number, U: Unit> Rect<N, U> {
 		}
 	}
 
-	pub fn new_min_max_u(min: impl Into<[N; 2]>, max: impl Into<[N; 2]>, unit: U) -> Rect<N, U> {
+	pub fn new_u_min_max(min: impl Into<[N; 2]>, max: impl Into<[N; 2]>, unit: U) -> Rect<N, U> {
 		let max = max.into();
 		let min = min.into();
 		Rect {
@@ -244,20 +254,20 @@ mod tests {
 
 	#[test]
 	fn contains() {
-		let rect = Rect::new([0.0f32, 0.0], [1.0, 1.0]);
-		assert!(rect.contains_rect(Rect::new([0.0f32, 0.0], [1.0, 1.0])));
-		assert!(rect.contains_rect(Rect::new([0.1f32, 0.1], [0.8, 0.8])));
-		assert!(!rect.contains_rect(Rect::new([0.1f32, 0.1], [1.0, 1.0])));
-		assert!(!rect.contains_rect(Rect::new([-0.1, -0.1], [1.1, 1.1])));
+		let rect = Rect::new_any([0.0f32, 0.0], [1.0, 1.0]);
+		assert!(rect.contains_rect(Rect::new_any([0.0f32, 0.0], [1.0, 1.0])));
+		assert!(rect.contains_rect(Rect::new_any([0.1f32, 0.1], [0.8, 0.8])));
+		assert!(!rect.contains_rect(Rect::new_any([0.1f32, 0.1], [1.0, 1.0])));
+		assert!(!rect.contains_rect(Rect::new_any([-0.1, -0.1], [1.1, 1.1])));
 	}
 
 	#[test]
 	fn overlaps() {
-		let rect = Rect::new([0.0f32, 0.0], [1.0, 1.0]);
-		assert!(rect.overlap_rect(Rect::new([0.0f32, 0.0], [1.0, 1.0])));
-		assert!(rect.overlap_rect(Rect::new([0.1f32, 0.1], [0.8, 0.8])));
-		assert!(rect.overlap_rect(Rect::new([0.1f32, 0.1], [1.0, 1.0])));
-		assert!(rect.overlap_rect(Rect::new([-0.1f32, -0.1f32], [0.1, 0.1])));
-		assert!(!rect.overlap_rect(Rect::new([1.11f32, 1.11], [1.0, 1.0])));
+		let rect = Rect::new_any([0.0f32, 0.0], [1.0, 1.0]);
+		assert!(rect.overlap_rect(Rect::new_any([0.0f32, 0.0], [1.0, 1.0])));
+		assert!(rect.overlap_rect(Rect::new_any([0.1f32, 0.1], [0.8, 0.8])));
+		assert!(rect.overlap_rect(Rect::new_any([0.1f32, 0.1], [1.0, 1.0])));
+		assert!(rect.overlap_rect(Rect::new_any([-0.1f32, -0.1f32], [0.1, 0.1])));
+		assert!(!rect.overlap_rect(Rect::new_any([1.11f32, 1.11], [1.0, 1.0])));
 	}
 }

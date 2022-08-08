@@ -25,7 +25,7 @@ and are designed to be easily converted between without thinking about it.
 fn cm_to_m() {
     let v0 = Vec2D::<f32, Centimeter>::new_def(250.0, 250.0);
     // () is base unit. In all cases its Meter
-    let v1 = v0.convert_def::<()>().unwrap();
+    let v1 = v0.convert::<()>();
     assert_eq!(v1, Vec2D::new_def(2.5, 2.5));
 }
 ```

@@ -29,23 +29,23 @@ mod tests {
 
     #[test]
     fn m_to_cm() {
-        let v0 = Vec2D::new(1, 1);
-        let v1 = v0.convert_def::<cm>().unwrap();
-        assert_eq!(v1, Vec2D::new_def(100, 100));
+        let v0 = Vec2D::new_any(1, 1);
+        let v1 = v0.convert::<cm>();
+        assert_eq!(v1, Vec2D::new(100, 100));
     }
 
     #[test]
     fn cm_to_m_float() {
-        let v0 = Vec2D::<u32, cm>::new_def(250, 250);
-        let v1 = v0.cast::<f32>().unwrap().convert_def::<()>().unwrap();
-        assert_eq!(v1, Vec2D::new_def(2.5, 2.5));
+        let v0 = Vec2D::<u32, cm>::new(250, 250);
+        let v1 = v0.try_cast::<f32>().unwrap().convert::<()>();
+        assert_eq!(v1, Vec2D::new(2.5, 2.5));
     }
 
     #[test]
     fn cm_to_m() {
-        let v0 = Vec2D::<u32, cm>::new_def(250, 250);
-        let v1 = v0.convert_def::<()>().unwrap();
-        assert_eq!(v1, Vec2D::new_def(2, 2));
+        let v0 = Vec2D::<u32, cm>::new(250, 250);
+        let v1 = v0.convert::<()>();
+        assert_eq!(v1, Vec2D::new(2, 2));
     }
 
 }

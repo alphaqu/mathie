@@ -6,13 +6,25 @@ use crate::unit::{check_compatible, Unit, UnitCompatibility};
 
 #[derive(Copy, Clone, Debug)]
 #[repr(C)]
-pub struct Value<T: Number, U: Unit> {
-	pub(crate) value: T,
+pub struct Value<N: Number, U: Unit = ()> {
+	pub(crate) value: N,
 	pub(crate) unit: U
 }
 
+impl<N: Number> Value<N> {
+	pub const fn new_any(value: N) -> Value<N> {
+		Self::new_u(value, ())
+	}
+}
+
+impl<N: Number, U: Unit + Default> Value<N, U> {
+	pub fn new(value: N) -> Value<N, U> {
+		Self::new_u(value, U::default())
+	}
+}
+
 impl<N: Number, U: Unit> Value<N, U> {
-	pub fn new(value: N, unit: U) -> Value<N, U> {
+	pub const fn new_u(value: N, unit: U) -> Value<N, U> {
 		Value {
 			value,
 			unit
