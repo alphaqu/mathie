@@ -1,5 +1,6 @@
 use std::cmp::Ordering;
 use std::fmt::Debug;
+use std::ops::Neg;
 use num_traits::{Float};
 use crate::number::Number;
 use crate::unit::{check_compatible, Unit, UnitCompatibility};
@@ -515,7 +516,7 @@ impl<N: Number + Ord, U: Unit> Ord for Vec2D<N, U> {
 
 macro_rules! impl_op {
     ($TRAIT:ident $TRAIT_ASSIGN:ident $METHOD:ident $METHOD_ASSIGN:ident) => {
-        impl<T: Number, U: Unit> $TRAIT for Vec2D<T, U> {
+        impl<T: Number + $TRAIT, U: Unit> $TRAIT for Vec2D<T, U> {
             type Output = Vec2D<T, U>;
 
             fn $METHOD(self, rhs: Self) -> Self::Output {
@@ -527,7 +528,7 @@ macro_rules! impl_op {
             }
         }
 
-        impl<T: Number, U: Unit> $TRAIT<T> for Vec2D<T, U> {
+        impl<T: Number + $TRAIT, U: Unit> $TRAIT<T> for Vec2D<T, U> {
             type Output = Vec2D<T, U>;
 
             fn $METHOD(self, rhs: T) -> Self::Output {
@@ -538,13 +539,13 @@ macro_rules! impl_op {
             }
         }
 
-        impl<T: Number, U: Unit> $TRAIT_ASSIGN<Vec2D<T, U>> for Vec2D<T, U> {
+        impl<T: Number + $TRAIT, U: Unit> $TRAIT_ASSIGN<Vec2D<T, U>> for Vec2D<T, U> {
             fn $METHOD_ASSIGN(&mut self, rhs: Self) {
                 *self = self.$METHOD(rhs);
             }
         }
 
-	    impl<T: Number, U: Unit> $TRAIT_ASSIGN<T> for Vec2D<T, U> {
+	    impl<T: Number + $TRAIT, U: Unit> $TRAIT_ASSIGN<T> for Vec2D<T, U> {
             fn $METHOD_ASSIGN(&mut self, rhs: T) {
                 *self = self.$METHOD(rhs);
             }
@@ -553,6 +554,20 @@ macro_rules! impl_op {
 }
 
 impl_ops!(impl_op);
+
+impl<N: Number + Neg<Output = N>, U: Unit> Neg for Vec2D<N, U> {
+	type Output = Vec2D<N, U>;
+
+	fn neg(self) -> Self::Output {
+		Vec2D {
+			value: [
+				-self.value[0],
+				-self.value[1],
+			],
+			unit: self.unit
+		}
+	}
+}
 
 #[cfg(test)]
 mod tests {
