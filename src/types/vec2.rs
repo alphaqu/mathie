@@ -1,11 +1,10 @@
 use std::cmp::Ordering;
 use std::fmt::Debug;
-use num_traits::{Float, Inv, PrimInt};
+use num_traits::{Float};
 use crate::number::Number;
 use crate::unit::{check_compatible, Unit, UnitCompatibility};
 use crate::impl_ops;
 use crate::types::value::Value;
-use crate::unit::imperial::th;
 
 #[derive(Copy, Clone, Debug)]
 #[repr(C)]
