@@ -1,5 +1,6 @@
 use std::cmp::Ordering;
 use std::ops::Deref;
+use num_traits::Float;
 use crate::impl_ops;
 use crate::number::Number;
 use crate::unit::{check_compatible, Unit, UnitCompatibility};
@@ -8,7 +9,7 @@ use crate::unit::{check_compatible, Unit, UnitCompatibility};
 #[repr(C)]
 pub struct Value<N: Number, U: Unit = ()> {
 	pub(crate) value: N,
-	pub(crate) unit: U
+	pub(crate) unit: U,
 }
 
 impl<N: Number> Value<N> {
@@ -23,16 +24,46 @@ impl<N: Number, U: Unit + Default> Value<N, U> {
 	}
 }
 
+
+impl<N: Number + Float, U: Unit> Value<N, U> {
+
+	/// Linearly interpolated the value of `self` and `other` by the value `t` where 0 is self and 1 is other.
+	/// # Arguments
+	///
+	/// * `other`: The target value.
+	/// * `t`:  A value which says where the value should be.
+	///
+	/// returns: Vec2D<N, U>
+	///
+	/// # Examples
+	/// ```
+	/// let v0 = mathie::Value::new_any(1.0);
+	/// let other = mathie::Value::new_any(2.0);
+	/// assert_eq!(v0.lerp(other, 0.0), v0);
+	/// assert_eq!(v0.lerp(other, 1.0), other);
+	/// assert_eq!(v0.lerp(other, 0.5), mathie::Value::new_any(1.5));
+	/// ```
+	#[inline(always)]
+	pub fn lerp(self, other: Value<N, U>, t: N) -> Value<N, U> {
+		check_compatible(&self.unit, &other.unit);
+		Value {
+			value: ((other.value - self.value) * t) + self.value,
+			unit: self.unit,
+		}
+	}
+}
+
+
 impl<N: Number, U: Unit> Value<N, U> {
 	pub const fn new_u(value: N, unit: U) -> Value<N, U> {
 		Value {
 			value,
-			unit
+			unit,
 		}
 	}
 
 	#[inline(always)]
-	pub fn cast<NO: Number>(self) ->  Option<Value<NO, U>> {
+	pub fn cast<NO: Number>(self) -> Option<Value<NO, U>> {
 		Some(Value {
 			value: NO::from(self.value)?,
 			unit: self.unit,
@@ -40,7 +71,7 @@ impl<N: Number, U: Unit> Value<N, U> {
 	}
 
 	#[inline(always)]
-	pub fn convert_def<UO: UnitCompatibility<N, U> + Default>(self) ->  Option<Value<N, UO>> {
+	pub fn convert_def<UO: UnitCompatibility<N, U> + Default>(self) -> Option<Value<N, UO>> {
 		self.convert_u(UO::default())
 	}
 
@@ -53,17 +84,17 @@ impl<N: Number, U: Unit> Value<N, U> {
 	pub fn any_unit(self) -> Value<N, ()> {
 		Value {
 			value: self.value,
-			unit: ()
+			unit: (),
 		}
 	}
 
 	#[inline(always)]
-	pub fn unit(self) -> U  {
+	pub fn unit(self) -> U {
 		self.unit
 	}
 
 	#[inline(always)]
-	pub fn val(self) -> N  {
+	pub fn val(self) -> N {
 		self.value
 	}
 }
@@ -124,9 +155,7 @@ impl<N: Number, U: Unit> PartialEq<Self> for Value<N, U> {
 	}
 }
 
-impl<N: Number, U: Unit> Eq for Value<N, U> {
-
-}
+impl<N: Number, U: Unit> Eq for Value<N, U> {}
 
 impl<N: Number, U: Unit> PartialOrd<Self> for Value<N, U> {
 	fn partial_cmp(&self, other: &Self) -> Option<Ordering> {

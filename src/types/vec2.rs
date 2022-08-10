@@ -5,6 +5,7 @@ use crate::number::Number;
 use crate::unit::{check_compatible, Unit, UnitCompatibility};
 use crate::impl_ops;
 use crate::types::value::Value;
+use crate::unit::imperial::th;
 
 #[derive(Copy, Clone, Debug)]
 #[repr(C)]
@@ -75,7 +76,7 @@ impl<N: Number, U: Unit> Vec2D<N, U> {
 
 	/// Same as [Self::try_convert] but panics if the conversion failed.
 	#[inline(always)]
-	pub fn convert<UO: UnitCompatibility<N, U>  + Default>(self) -> Vec2D<N, UO> {
+	pub fn convert<UO: UnitCompatibility<N, U> + Default>(self) -> Vec2D<N, UO> {
 		self.try_convert().expect("Failed to convert units.")
 	}
 
@@ -400,6 +401,35 @@ impl<N: Number + Float, U: Unit> Vec2D<N, U> {
 			value: [
 				self.value[0] / *hypot,
 				self.value[1] / *hypot,
+			],
+			unit: self.unit,
+		}
+	}
+
+
+	/// Linearly interpolated the value of `self` and `other` by the value `t` where 0 is self and 1 is other.
+	/// # Arguments
+	///
+	/// * `other`: The target value.
+	/// * `t`:  A value which says where the value should be.
+	///
+	/// returns: Vec2D<N, U>
+	///
+	/// # Examples
+	/// ```
+	/// let v0 = mathie::Vec2D::new_any(1.0, 1.0);
+	/// let other = mathie::Vec2D::new_any(2.0, 2.0);
+	/// assert_eq!(v0.lerp(other, 0.0), v0);
+	/// assert_eq!(v0.lerp(other, 1.0), other);
+	/// assert_eq!(v0.lerp(other, 0.5), mathie::Vec2D::new_any(1.5, 1.5));
+	/// ```
+	#[inline(always)]
+	pub fn lerp(self, other: Vec2D<N, U>, t: N) -> Vec2D<N, U> {
+		check_compatible(&self.unit, &other.unit);
+		Vec2D {
+			value: [
+				self.x().lerp(other.x(), t).val(),
+				self.y().lerp(other.y(), t).val(),
 			],
 			unit: self.unit,
 		}
