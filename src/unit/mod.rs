@@ -21,11 +21,11 @@ pub trait Unit: Copy + Debug {
 }
 
 pub trait UnitCompatibility<N: Number, Rhs: Unit>: Unit {
-	fn convert_value(&self, value: N) -> Option<N>;
+	fn convert_value(&self, value: N, unit: Rhs) -> Option<N>;
 	/// Converts the Position with the unit `Rhs` to the desired unit.
 	fn convert_pos2(&self, pos: Vec2D<N, Rhs>) -> Option<Vec2D<N, Self>> {
-		let x = self.convert_value(pos.x())?;
-		let y = self.convert_value(pos.y())?;
+		let x = self.convert_value(pos.x(), pos.unit)?;
+		let y = self.convert_value(pos.y(), pos.unit)?;
 		Some(Vec2D::new_u(x, y, *self))
 	}
 	fn convert_rect(&self, rect: Rect<N, Rhs>) -> Option<Rect<N, Self>> {
@@ -82,8 +82,8 @@ impl BasePrefix for () {
 
 
 impl<N: Number, F: BasePrefix + Unit, T: BasePrefix + Unit> UnitCompatibility<N, F> for T {
-	fn convert_value(&self, value: N) -> Option<N> {
+	fn convert_value(&self, value: N, _: F) -> Option<N> {
 		let ratio = F::base_factor() / T::base_factor();
-		Some(N::from_f64(value.to_f64()? * ratio)?)
+		N::from_f64(value.to_f64()? * ratio)
 	}
 }
