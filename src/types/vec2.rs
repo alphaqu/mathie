@@ -5,7 +5,6 @@ use num_traits::{Float};
 use crate::number::Number;
 use crate::unit::{check_compatible, Unit, UnitCompatibility};
 use crate::impl_ops;
-use crate::types::value::Value;
 
 #[derive(Copy, Clone, Debug)]
 #[repr(C)]
@@ -280,11 +279,11 @@ impl<N: Number, U: Unit> Vec2D<N, U> {
 	///
 	/// ```
 	/// let v0 = mathie::Vec2D::new_any(1.0, 1.0);
-	/// assert_eq!(*v0.add_vals(), 2.0)
+	/// assert_eq!(v0.add_vals(), 2.0)
 	/// ```
 	#[inline(always)]
-	pub fn add_vals(self) -> Value<N, U> {
-		Value::new_u(self.value[0] + self.value[1], self.unit)
+	pub fn add_vals(self) -> N {
+		self.value[0] + self.value[1]
 	}
 
 	/// Subtracts both of the values together.
@@ -292,11 +291,11 @@ impl<N: Number, U: Unit> Vec2D<N, U> {
 	///
 	/// ```
 	/// let v0 = mathie::Vec2D::new_any(1.0, 2.0);
-	/// assert_eq!(*v0.sub_vals(), -1.0)
+	/// assert_eq!(v0.sub_vals(), -1.0)
 	/// ```
 	#[inline(always)]
-	pub fn sub_vals(self) -> Value<N, U> {
-		Value::new_u(self.value[0] - self.value[1], self.unit)
+	pub fn sub_vals(self) -> N {
+		self.value[0] - self.value[1]
 	}
 
 	/// Multiplies both of the values together.
@@ -304,11 +303,11 @@ impl<N: Number, U: Unit> Vec2D<N, U> {
 	///
 	/// ```
 	/// let v0 = mathie::Vec2D::new_any(2.0, 2.0);
-	/// assert_eq!(*v0.mul_vals(), 4.0)
+	/// assert_eq!(v0.mul_vals(), 4.0)
 	/// ```
 	#[inline(always)]
-	pub fn mul_vals(self) -> Value<N, U> {
-		Value::new_u(self.value[0] * self.value[1], self.unit)
+	pub fn mul_vals(self) -> N {
+		self.value[0] * self.value[1]
 	}
 
 	/// Divides both of the values together.
@@ -316,11 +315,11 @@ impl<N: Number, U: Unit> Vec2D<N, U> {
 	///
 	/// ```
 	/// let v0 = mathie::Vec2D::new_any(2.0, 4.0);
-	/// assert_eq!(*v0.div_vals(), 0.5)
+	/// assert_eq!(v0.div_vals(), 0.5)
 	/// ```
 	#[inline(always)]
-	pub fn div_vals(self) -> Value<N, U> {
-		Value::new_u(self.value[0] / self.value[1], self.unit)
+	pub fn div_vals(self) -> N {
+		self.value[0] / self.value[1]
 	}
 
 	/// Returns the unit of this vector.
@@ -331,14 +330,14 @@ impl<N: Number, U: Unit> Vec2D<N, U> {
 
 	/// Returns the X value.
 	#[inline(always)]
-	pub fn x(self) -> Value<N, U> {
-		Value::new_u(self.value[0], self.unit)
+	pub fn x(self) -> N {
+		self.value[0]
 	}
 
 	/// Returns the Y value.
 	#[inline(always)]
-	pub fn y(self) -> Value<N, U> {
-		Value::new_u(self.value[1], self.unit)
+	pub fn y(self) -> N {
+		self.value[1]
 	}
 
 	/// Does nothing.
@@ -366,14 +365,11 @@ impl<N: Number + Ord, U: Unit> Vec2D<N, U> {
 	///
 	/// ```
 	/// let v0 = mathie::Vec2D::new_any(1, 2);
-	/// assert_eq!(*v0.min(), 1)
+	/// assert_eq!(v0.min(), 1)
 	/// ```
 	#[inline(always)]
-	pub fn min(self) -> Value<N, U> {
-		Value {
-			value: N::min(self.value[0], self.value[1]),
-			unit: self.unit,
-		}
+	pub fn min(self) -> N {
+		N::min(self.value[0], self.value[1])
 	}
 
 	/// Gets the biggest value of the Vector.
@@ -381,14 +377,11 @@ impl<N: Number + Ord, U: Unit> Vec2D<N, U> {
 	///
 	/// ```
 	/// let v0 = mathie::Vec2D::new_any(1, 2);
-	/// assert_eq!(*v0.max(), 2)
+	/// assert_eq!(v0.max(), 2)
 	/// ```
 	#[inline(always)]
-	pub fn max(self) -> Value<N, U> {
-		Value {
-			value: N::max(self.value[0], self.value[1]),
-			unit: self.unit,
-		}
+	pub fn max(self) ->N  {
+		N::max(self.value[0], self.value[1])
 	}
 }
 
@@ -399,8 +392,8 @@ impl<N: Number + Float, U: Unit> Vec2D<N, U> {
 		let hypot = self.hypot();
 		Vec2D {
 			value: [
-				self.value[0] / *hypot,
-				self.value[1] / *hypot,
+				self.value[0] / hypot,
+				self.value[1] / hypot,
 			],
 			unit: self.unit,
 		}
@@ -428,8 +421,8 @@ impl<N: Number + Float, U: Unit> Vec2D<N, U> {
 		check_compatible(&self.unit, &other.unit);
 		Vec2D {
 			value: [
-				self.x().lerp(other.x(), t).val(),
-				self.y().lerp(other.y(), t).val(),
+				self.x() + ((other.x() - self.x()) * t),
+				self.y() + ((other.y() - self.y()) * t),
 			],
 			unit: self.unit,
 		}
@@ -437,29 +430,20 @@ impl<N: Number + Float, U: Unit> Vec2D<N, U> {
 
 	/// The same as [Self::min] but for floating-point numbers.
 	#[inline(always)]
-	pub fn minf(self) -> Value<N, U> {
-		Value {
-			value: N::min(self.value[0], self.value[1]),
-			unit: self.unit,
-		}
+	pub fn minf(self) -> N {
+		N::min(self.value[0], self.value[1])
 	}
 
 	/// The same as [Self::max] but for floating-point numbers.
 	#[inline(always)]
-	pub fn maxf(self) -> Value<N, U> {
-		Value {
-			value: N::max(self.value[0], self.value[1]),
-			unit: self.unit,
-		}
+	pub fn maxf(self) ->N {
+		N::max(self.value[0], self.value[1])
 	}
 
 	/// Gets the hypotenuse of the vector. In other terms the length.
 	#[inline(always)]
-	pub fn hypot(self) -> Value<N, U> {
-		Value {
-			value: N::hypot(self.value[0], self.value[1]),
-			unit: self.unit,
-		}
+	pub fn hypot(self) -> N {
+		N::hypot(self.value[0], self.value[1])
 	}
 }
 

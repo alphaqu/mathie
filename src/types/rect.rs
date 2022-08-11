@@ -87,21 +87,69 @@ impl<N: Number, U: Unit> Rect<N, U> {
 		to.convert_rect(self)
 	}
 
-	pub fn overlap_rect(&self, other: Rect<N, U>) -> bool {
-		self.contains_pos(other.min()) || self.contains_pos(other.max())
+
+	/// Checks if self intersects other. In other words it check if any of these rectangles touch each other.
+	/// This is very useful in cull testing.
+	///
+	/// # Arguments
+	///
+	/// * `other`: The other rectangle to check intersection with.
+	///
+	/// returns: bool
+	///
+	/// # Examples
+	///
+	/// ```
+	/// use mathie::Rect;
+	/// let rect = Rect::new_any([0.0, 0.0], [1.0, 1.0]);
+	/// assert!(rect.intersects_rect(Rect::new_any([0.0, 0.0], [1.0, 1.0])));
+	/// assert!(rect.intersects_rect(Rect::new_any([0.4, 0.4], [0.2, 0.2])));
+	/// assert!(rect.intersects_rect(Rect::new_any([1.0, 1.0], [1.0, 1.0])));
+	/// assert!(rect.intersects_rect(Rect::new_any([0.0, 0.5], [0.5, 1.0])));
+	/// assert!(!rect.intersects_rect(Rect::new_any([1.1, 1.1], [1.0, 1.0])));
+	/// assert!(!rect.intersects_rect(Rect::new_any([-0.1, -0.1], [0.09, 0.09])));
+	/// ```
+	pub fn intersects_rect(&self, other: Rect<N, U>) -> bool {
+		let s_min = self.min();
+		let s_max = self.max();
+		let o_min = other.min();
+		let o_max = other.max();
+		s_min.x() <= (o_max.x()) && (s_max.x()) >= o_min.x() &&
+			s_min.y() <= (o_max.y()) && (s_max.y()) >= o_min.y()
 	}
 
+	/// Checks if `self` contains `other`, in other words, it checks if `self` fully contains `other`.
+	///
+	/// # Arguments
+	///
+	/// * `other`: The other rectangle to check if it is inside self.
+	///
+	/// returns: bool
+	///
+	/// # Examples
+	///
+	/// ```
+	/// use mathie::Rect;
+	/// let rect = Rect::new_any([0.0, 0.0], [1.0, 1.0]);
+	/// assert!(rect.contains_rect(Rect::new_any([0.0, 0.0], [1.0, 1.0])));
+	/// assert!(rect.contains_rect(Rect::new_any([0.4, 0.4], [0.2, 0.2])));
+	/// assert!(!rect.contains_rect(Rect::new_any([1.0, 1.0], [1.0, 1.0])));
+	/// assert!(!rect.contains_rect(Rect::new_any([0.0, 0.5], [0.5, 1.0])));
+	/// assert!(!rect.contains_rect(Rect::new_any([1.1, 1.1], [1.0, 1.0])));
+	/// assert!(!rect.contains_rect(Rect::new_any([-0.1, -0.1], [0.09, 0.09])));
+	/// ```
 	pub fn contains_rect(&self, rect: Rect<N, U>) -> bool {
 		self.contains_pos(rect.min()) && self.contains_pos(rect.max())
 	}
 
+	/// Checks if this position is inside this rectangle
 	pub fn contains_pos(&self, pos: Vec2D<N, U>) -> bool {
 		let s_min = self.min();
 		let s_max = self.max();
 		s_min.x() <= pos.x() && pos.x() <= s_max.x() && s_min.y() <= pos.y() && pos.y() <= s_max.y()
 	}
 
-
+	/// Converts this rectangle to a generic any unit.
 	#[inline(always)]
 	pub fn any_unit(self) -> Rect<N, ()> {
 		Rect {
@@ -111,29 +159,59 @@ impl<N: Number, U: Unit> Rect<N, U> {
 		}
 	}
 
+	/// Gets the unit of this vector.
 	#[inline(always)]
 	pub fn unit(self) -> U {
 		self.unit
 	}
 
+	/// Gets the top left corner
 	#[inline(always)]
 	pub fn top_left(self) -> Vec2D<N, U> {
 		self.origin()
 	}
 
+	/// Gets the top right corner
 	#[inline(always)]
 	pub fn top_right(self) -> Vec2D<N, U> {
 		self.origin() + Vec2D::new_u(self.size[0], N::zero(), self.unit)
 	}
 
+	/// Gets the bottom right corner
 	#[inline(always)]
 	pub fn bottom_right(self) -> Vec2D<N, U> {
 		self.origin() + Vec2D::new_u(self.size[0], self.size[1], self.unit)
 	}
 
+	/// Gets the bottom left corner
 	#[inline(always)]
 	pub fn bottom_left(self) -> Vec2D<N, U> {
 		self.origin() + Vec2D::new_u(N::zero(), self.size[1], self.unit)
+	}
+
+	#[inline(always)]
+	pub fn top(self) -> N {
+		self.min().y()
+	}
+
+	#[inline(always)]
+	pub fn left(self) -> N {
+		self.min().x()
+	}
+
+	#[inline(always)]
+	pub fn bottom(self) -> N {
+		self.max().y()
+	}
+
+	#[inline(always)]
+	pub fn right(self) -> N {
+		self.max().x()
+	}
+
+	#[inline(always)]
+	pub fn center(self) -> Vec2D<N, U> {
+		self.origin() + (self.size() / N::from_u8(2).unwrap())
 	}
 
 	#[inline(always)]
@@ -146,6 +224,7 @@ impl<N: Number, U: Unit> Rect<N, U> {
 		self.origin() + self.size()
 	}
 
+	/// Gets the origin of the rectangle. (top-left)
 	#[inline(always)]
 	pub fn origin(self) -> Vec2D<N, U> {
 		Vec2D {
@@ -154,6 +233,7 @@ impl<N: Number, U: Unit> Rect<N, U> {
 		}
 	}
 
+	/// Gets the size of the rectangle
 	#[inline(always)]
 	pub fn size(self) -> Vec2D<N, U> {
 		Vec2D {
@@ -250,7 +330,7 @@ impl<N: Number + Ord, U: Unit> Ord for Rect<N, U> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+	use super::*;
 
 	#[test]
 	fn contains() {
@@ -264,10 +344,11 @@ mod tests {
 	#[test]
 	fn overlaps() {
 		let rect = Rect::new_any([0.0f32, 0.0], [1.0, 1.0]);
-		assert!(rect.overlap_rect(Rect::new_any([0.0f32, 0.0], [1.0, 1.0])));
-		assert!(rect.overlap_rect(Rect::new_any([0.1f32, 0.1], [0.8, 0.8])));
-		assert!(rect.overlap_rect(Rect::new_any([0.1f32, 0.1], [1.0, 1.0])));
-		assert!(rect.overlap_rect(Rect::new_any([-0.1f32, -0.1f32], [0.1, 0.1])));
-		assert!(!rect.overlap_rect(Rect::new_any([1.11f32, 1.11], [1.0, 1.0])));
+		assert!(rect.intersects_rect(Rect::new_any([0.0f32, 0.0], [1.0, 1.0])));
+		assert!(rect.intersects_rect(Rect::new_any([0.1f32, 0.1], [0.8, 0.8])));
+		assert!(rect.intersects_rect(Rect::new_any([0.1f32, 0.1], [1.0, 1.0])));
+		assert!(rect.intersects_rect(Rect::new_any([-0.1, -0.1], [1.2, 1.2])));
+		assert!(rect.intersects_rect(Rect::new_any([-0.1f32, -0.1f32], [0.1, 0.1])));
+		assert!(!rect.intersects_rect(Rect::new_any([1.11f32, 1.11], [1.0, 1.0])));
 	}
 }

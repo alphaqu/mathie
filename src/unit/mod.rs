@@ -9,7 +9,6 @@ use std::fmt::Debug;
 use crate::number::Number;
 use crate::types::vec2::Vec2D;
 use crate::types::rect::Rect;
-use crate::types::value::Value;
 
 pub trait Unit: Copy + Debug {
 	/// When for example adding two numbers together.
@@ -22,12 +21,12 @@ pub trait Unit: Copy + Debug {
 }
 
 pub trait UnitCompatibility<N: Number, Rhs: Unit>: Unit {
-	fn convert_value(&self, value: Value<N, Rhs>) -> Option<Value<N, Self>>;
+	fn convert_value(&self, value: N) -> Option<N>;
 	/// Converts the Position with the unit `Rhs` to the desired unit.
 	fn convert_pos2(&self, pos: Vec2D<N, Rhs>) -> Option<Vec2D<N, Self>> {
 		let x = self.convert_value(pos.x())?;
 		let y = self.convert_value(pos.y())?;
-		Some(Vec2D::new_u(x.value, y.value, *self))
+		Some(Vec2D::new_u(x, y, *self))
 	}
 	fn convert_rect(&self, rect: Rect<N, Rhs>) -> Option<Rect<N, Self>> {
 		let origin = rect.origin().try_convert_u(*self)?;
@@ -83,11 +82,8 @@ impl BasePrefix for () {
 
 
 impl<N: Number, F: BasePrefix + Unit, T: BasePrefix + Unit> UnitCompatibility<N, F> for T {
-	fn convert_value(&self, value: Value<N, F>) -> Option<Value<N, Self>> {
+	fn convert_value(&self, value: N) -> Option<N> {
 		let ratio = F::base_factor() / T::base_factor();
-		Some(Value {
-			value: N::from_f64(value.to_f64()? * ratio)?,
-			unit: *self
-		})
+		Some(N::from_f64(value.to_f64()? * ratio)?)
 	}
 }
