@@ -1,6 +1,6 @@
 [package]
 name = "mathie"
-version = "0.5.0"
+version = "0.6.0"
 edition = "2021"
 license = "MIT / Apache-2.0"
 readme = "README.md"
@@ -16,16 +16,11 @@ exclude = [
 ]
 
 [dependencies]
-num-traits = "0.2.15"
-euclid = { version = "0.22.7", optional = true }
+num-traits = "0.2"
+euclid = { version = "0.22", optional = true }
+serde = { version = "1", optional = true, features = ["derive"] }
 
 [features]
-debug_unit_check = []
-
-metric_units = []
-imperial_units = []
-nautical_units = []
-
 euclid_compat = ["euclid"]
-
+serde = ["dep:serde"]
 

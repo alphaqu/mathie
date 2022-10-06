@@ -2,28 +2,28 @@
 use euclid::{Point2D, Vector2D};
 use crate::number::Number;
 use crate::types::rect::Rect;
-use crate::types::vec2::Vec2D;
+use crate::types::vec2::Vec2;
 
-impl<T: Number, U> From<Vector2D<T, U>> for Vec2D<T, ()> {
+impl<T: Number, U> From<Vector2D<T, U>> for Vec2<T> {
 	fn from(vec: Vector2D<T, U>) -> Self {
-		Vec2D::new_any(vec.x, vec.y)
+		Vec2::new(vec.x, vec.y)
 	}
 }
 
-impl<T: Number, U> From<Point2D<T, U>> for Vec2D<T, ()> {
+impl<T: Number, U> From<Point2D<T, U>> for Vec2<T> {
 	fn from(point: Point2D<T, U>) -> Self {
-		Vec2D::new_any(point.x, point.y)
+		Vec2::new(point.x, point.y)
 	}
 }
 
-impl<T: Number, U> From<euclid::Rect<T, U>> for Rect<T, ()> {
+impl<T: Number, U> From<euclid::Rect<T, U>> for Rect<T> {
 	fn from(rect: euclid::Rect<T, U>) -> Self {
-		Rect::new_any(rect.origin.to_array(), rect.size.to_array())
+		Rect::new(rect.origin.to_array(), rect.size.to_array())
 	}
 }
 
-impl<T: Number, U> From<euclid::Box2D<T, U>> for Rect<T, ()> {
+impl<T: Number, U> From<euclid::Box2D<T, U>> for Rect<T> {
 	fn from(b: euclid::Box2D<T, U>) -> Self {
-		Rect::new_any_min_max(b.min.to_array(), b.max.to_array())
+		Rect::new_min_max(b.min.to_array(), b.max.to_array())
 	}
 }
